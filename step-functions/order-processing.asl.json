@@ -1,0 +1,93 @@
+{
+  "Comment": "Order processing workflow",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:748827982995:function:ValidateOrderLambda",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "SendFailureAlert"
+        }
+      ],
+      "Next": "CreateOrder"
+    },
+
+    "CreateOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:748827982995:function:myfunc",
+      "ResultPath": "$.createOrderResult",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "SendFailureAlert"
+        }
+      ],
+      "Next": "SendToSQS"
+    },
+
+    "SendToSQS": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/748827982995/order-processing-queue",
+        "MessageBody": {
+          "order_id.$": "$.createOrderResult.order_id",
+          "status.$": "$.createOrderResult.status",
+          "product.$": "$.product",
+          "quantity.$": "$.quantity",
+          "price.$": "$.price",
+          "customer_id.$": "$.customer_id"
+        }
+      },
+      "Next": "NotifyOrder"
+    },
+
+    "NotifyOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:748827982995:function:NotifyOrderLambda",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "SendFailureAlert"
+        }
+      ],
+      "End": true
+    },
+
+    "SendFailureAlert": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "arn:aws:sns:us-east-1:748827982995:order-processing-alerts",
+        "Message": {
+          "workflow": "OrderProcessing",
+          "error.$": "$.error",
+          "input.$": "$"
+        },
+        "Subject": "Order Processing Failed"
+      },
+      "End": true
+    }
+  }
+}
