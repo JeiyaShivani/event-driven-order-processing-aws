@@ -13,7 +13,7 @@ This system implements a serverless, event-driven order processing workflow usin
 The request flow is as follows:
 
 1. Client sends an order request via API Gateway.
-2. API Gateway triggers an AWS Step Functions state machine.
+2. API Gateway triggers StartWorkflowLambda which then triggers AWS Step Functions state machine.
 3. Step Functions orchestrates multiple Lambda functions:
    - ValidateOrderLambda validates incoming order data.
    - CreateOrderLambda creates the order and returns an order ID.
@@ -21,6 +21,7 @@ The request flow is as follows:
 5. On failure, Step Functions catches the error and publishes an alert to SNS.
 6. SNS triggers AlertHandlerLambda, which logs the failure and sends real-time notifications (Slack).
 7. NotifyOrderLambda handles post-processing notifications.
+8. There is another lambda which is called ProcessOrderWorkerLambda.
 
 The architecture is designed to be fault-tolerant, observable, and easily extensible.
 
@@ -41,3 +42,38 @@ Amazon SNS
 Slack Webhooks
 
 CloudWatch
+
+
+## Design Decisions
+- Workflow orchestration using AWS Step Functions
+- Asynchronous processing using SQS
+- Centralized failure handling and alerting
+- Idempotent order creation using TTL-based locking
+
+### 1. Why AWS Step Functions?
+Step Functions is used as the orchestration layer instead of chaining Lambdas manually.
+Reasons:
+- Clear visual workflow for debugging and monitoring
+- Native retry, error handling, and state transitions
+This makes the system easier to scale, and maintain.
+
+### 2. Why Multiple Lambdas Instead of One?
+Each Lambda has a single responsibility:
+- ValidateOrderLambda : input validation
+- CreateOrderLambda : order creation logic
+- NotifyOrderLambda : notification handling
+- AlertHandlerLambda : failure logging and alerting
+
+### 3. Why Centralized Error Handling via Step Functions?
+Errors are intentionally handled at the Step Functions level using `Catch` blocks instead of inside each Lambda.
+- Consistent failure handling across the workflow
+- Failures are routed to SNS, which fans out alerts to downstream systems.
+
+
+### 4. Why SNS + Lambda for Alerts?
+Instead of directly calling Slack or email from Step Functions
+- SNS publishes failure events
+- AlertHandlerLambda subscribes to SNS
+- AlertHandlerLambda sends Slack notifications and logs to CloudWatch
+This allows adding more alerting targets (email, PagerDuty) without changing the workflow.
+
