@@ -3,4 +3,13 @@
   "price":800,
   "customer_id":"c101",
   "order_id":"06cae94c-aab9-4cce-8aa7-903b8fb18cc5",
-  "status":"CREATED"}
+  "status":"CREATED
+
+  with key
+{
+  "product": "vivo11",
+  "quantity": 2,
+  "price": 500,
+  "customer_id": "c103",
+  "idempotency_key": "c103-vivo-2026-02-03"
+}
