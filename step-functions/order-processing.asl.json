@@ -7,7 +7,9 @@
       "Resource": "arn:aws:lambda:us-east-1:748827982995:function:ValidateOrderLambda",
       "Retry": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "IntervalSeconds": 2,
           "MaxAttempts": 2,
           "BackoffRate": 2
@@ -15,21 +17,24 @@
       ],
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "ResultPath": "$.error",
           "Next": "SendFailureAlert"
         }
       ],
       "Next": "CreateOrder"
     },
-
     "CreateOrder": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:748827982995:function:myfunc",
       "ResultPath": "$.createOrderResult",
       "Retry": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "IntervalSeconds": 2,
           "MaxAttempts": 2,
           "BackoffRate": 2
@@ -37,14 +42,15 @@
       ],
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "ResultPath": "$.error",
           "Next": "SendFailureAlert"
         }
       ],
       "Next": "SendToSQS"
     },
-
     "SendToSQS": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sqs:sendMessage",
@@ -61,20 +67,20 @@
       },
       "Next": "NotifyOrder"
     },
-
     "NotifyOrder": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:748827982995:function:NotifyOrderLambda",
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "ResultPath": "$.error",
           "Next": "SendFailureAlert"
         }
       ],
       "End": true
     },
-
     "SendFailureAlert": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
