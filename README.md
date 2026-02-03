@@ -48,7 +48,7 @@ CloudWatch
 - Workflow orchestration using AWS Step Functions
 - Asynchronous processing using SQS
 - Centralized failure handling and alerting
-- Idempotent order creation using TTL-based locking
+- Idempotent order creation using TTL-based locking,24 hours is the time to live.
 
 ### 1. Why AWS Step Functions?
 Step Functions is used as the orchestration layer instead of chaining Lambdas manually.
