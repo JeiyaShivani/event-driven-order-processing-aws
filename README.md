@@ -4,7 +4,8 @@ Traditional synchronous order systems fail silently and are hard to monitor.
 This project demonstrates a resilient, event-driven order processing pipeline with centralized failure alerting.
 
 ## Architecture
-<img width="1302" height="600" alt="image" src="https://github.com/user-attachments/assets/3beb65ab-1ce1-4bdb-a229-9a95a16392f6" />
+
+<img width="1266" height="675" alt="architecture-diagram-for-event-system" src="https://github.com/user-attachments/assets/cb1cec1c-ff53-4cfa-95a5-39e9c1db161b" />
 
 ## Architecture Overview
 
