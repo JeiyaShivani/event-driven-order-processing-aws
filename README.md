@@ -78,3 +78,9 @@ Instead of directly calling Slack or email from Step Functions
 - AlertHandlerLambda sends Slack notifications and logs to CloudWatch
 This allows adding more alerting targets (email, PagerDuty) without changing the workflow.
 
+## Blog Post
+
+A detailed explanation of the architecture, design decisions, and failure handling strategy is available here:
+
+Medium Blog: https://medium.com/@jeiyashivaniss/designing-a-fault-tolerant-order-processing-system-on-aws-using-step-functions-lambda-sqs-3943c28b4724
+
